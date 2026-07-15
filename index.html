@@ -96,11 +96,12 @@ tr:nth-child(even){
 tr:hover{
   background-color: #eef5ff;
 }
-/* 長品名自動換行 */
-td:nth-child(2){
+/* 品名欄：靠左 + 自動換行，禁止逐字垂直顯示 */
+td.col-name{
   text-align: left;
   word-break: break-word;
   white-space: normal;
+  line-height: 1.5;
 }
 </style>
 </head>
@@ -133,30 +134,70 @@ td:nth-child(2){
 <script>
 let stockList = [];
 
+// 簡易正確CSV解析（處理引號欄位）
+function parseCSV(csvText) {
+  const result = [];
+  let row = [];
+  let field = '';
+  let insideQuote = false;
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    const nextChar = csvText[i+1];
+    if (insideQuote) {
+      if (char === '"' && nextChar === '"') {
+        field += '"';
+        i++;
+      } else if (char === '"') {
+        insideQuote = false;
+      } else {
+        field += char;
+      }
+    } else {
+      if (char === '"') {
+        insideQuote = true;
+      } else if (char === ',') {
+        row.push(field.trim());
+        field = '';
+      } else if (char === '\n' || char === '\r') {
+        if (field !== '' || row.length > 0) {
+          row.push(field.trim());
+          result.push(row);
+          row = [];
+          field = '';
+        }
+      } else {
+        field += char;
+      }
+    }
+  }
+  if (field !== '' || row.length > 0) {
+    row.push(field.trim());
+    result.push(row);
+  }
+  return result;
+}
+
 fetch("./stock.csv")
 .then(res => res.text())
 .then(text => {
-    parseCSV(text);
+    const rows = parseCSV(text);
+    stockList = [];
+    // 跳過表頭行，逐行讀取4欄資料
+    for(let i=1; i<rows.length; i++){
+        const arr = rows[i];
+        if(arr.length >= 4){
+            stockList.push({
+                pid: arr[0],
+                name: arr[1],
+                shelf: arr[2],
+                qty: arr[3]
+            })
+        }
+    }
 })
 .catch(() => {
     document.getElementById("resultTable").innerHTML = `<tr><td colspan="4">無法讀取 stock.csv，請確認檔案存在</td></tr>`;
 })
-
-function parseCSV(txt){
-    const rows = txt.trim().split("\n");
-    stockList = [];
-    for(let i=1; i<rows.length; i++){
-        let arr = rows[i].split(",");
-        if(arr.length >= 4){
-            stockList.push({
-                pid: arr[0].trim(),
-                name: arr[1].trim(),
-                shelf: arr[2].trim(),
-                qty: arr[3].trim()
-            })
-        }
-    }
-}
 
 document.getElementById("searchBtn").onclick = function(){
     let key = document.getElementById("keyword").value.trim().toLowerCase();
@@ -189,7 +230,7 @@ document.getElementById("searchBtn").onclick = function(){
         tbody.innerHTML += `
         <tr>
             <td>${row.pid}</td>
-            <td>${row.name}</td>
+            <td class="col-name">${row.name}</td>
             <td>${row.shelf}</td>
             <td>${row.qty}</td>
         </tr>
