@@ -96,7 +96,7 @@ tr:nth-child(even){
 tr:hover{
   background-color: #eef5ff;
 }
-/* 品名欄：靠左 + 自動換行，禁止逐字垂直顯示 */
+/* 品名欄：靠左對齊 + 自動換行，解決豎排問題 */
 td.col-name{
   text-align: left;
   word-break: break-word;
@@ -134,7 +134,7 @@ td.col-name{
 <script>
 let stockList = [];
 
-// 簡易正確CSV解析（處理引號欄位）
+// 專業CSV解析器，正確處理引號、換行、逗號欄位
 function parseCSV(csvText) {
   const result = [];
   let row = [];
@@ -177,6 +177,7 @@ function parseCSV(csvText) {
   return result;
 }
 
+// 載入UTF-8編碼的CSV檔
 fetch("./stock.csv")
 .then(res => res.text())
 .then(text => {
@@ -199,6 +200,7 @@ fetch("./stock.csv")
     document.getElementById("resultTable").innerHTML = `<tr><td colspan="4">無法讀取 stock.csv，請確認檔案存在</td></tr>`;
 })
 
+// 查詢功能
 document.getElementById("searchBtn").onclick = function(){
     let key = document.getElementById("keyword").value.trim().toLowerCase();
     let tbody = document.getElementById("resultTable");
@@ -211,6 +213,7 @@ document.getElementById("searchBtn").onclick = function(){
         return;
     }
 
+    // 支援貨號、品名雙模糊查詢
     let list = stockList.filter(item=>{
         return item.pid.toLowerCase().includes(key) || item.name.toLowerCase().includes(key);
     })
@@ -220,12 +223,14 @@ document.getElementById("searchBtn").onclick = function(){
         return;
     }
 
+    // 計算總庫存
     let sum = list.reduce((acc, cur)=>{
         return acc + (Number(cur.qty) || 0);
     }, 0);
     totalBox.innerHTML = `查詢結果共 ${list.length} 筆｜合計總庫存：${sum}`;
     totalBox.style.display = "block";
 
+    // 渲染結果，品名欄加入專屬樣式
     list.forEach(row=>{
         tbody.innerHTML += `
         <tr>
@@ -243,7 +248,7 @@ document.getElementById("keyword").addEventListener("keydown", e=>{
     if(e.key === "Enter") document.getElementById("searchBtn").click();
 })
 
-// 重置
+// 重置清空
 document.getElementById("resetBtn").onclick = ()=>{
     document.getElementById("keyword").value = "";
     document.getElementById("resultTable").innerHTML = "";
