@@ -2,36 +2,121 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>貨號名稱架位庫存查詢</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>庫存查詢系統</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"微軟正黑體",sans-serif;}
-body{background:#f5f7fa;padding:20px;max-width:1250px;margin:0 auto;}
-.wrap{background:#fff;padding:28px;border-radius:12px;box-shadow:0 2px 14px #e2e8f0;}
-h2{text-align:center;margin-bottom:20px;color:#2d3748;}
-.search-area{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
-#keyword{flex:1;min-width:280px;padding:12px 15px;border:1px solid #cbd5e0;border-radius:6px;font-size:16px;}
-button{padding:12px 20px;border:none;border-radius:6px;cursor:pointer;font-size:15px;}
-#searchBtn{background:#2b6cb0;color:#fff;}
-#resetBtn{background:#718096;color:#fff;}
-.total-box{background:#f0f4fa;padding:15px;border-radius:6px;margin-bottom:18px;font-size:16px;}
-table{width:100%;border-collapse:collapse;}
-th,td{border:1px solid #e2e8f0;padding:14px;text-align:center;}
-th{background:#edf2f7;}
-tr:hover{background:#f7fafc;}
-.tip{font-size:14px;color:#666;margin-bottom:12px;}
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", sans-serif;
+}
+body{
+  background-color: #f0f4f9;
+  padding: 16px;
+}
+.container{
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+h1{
+  text-align: center;
+  font-size: 22px;
+  color: #223354;
+  margin-bottom: 16px;
+}
+.desc{
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.search-bar{
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+#keyword{
+  flex: 1;
+  min-width: 180px;
+  padding: 14px 16px;
+  border: 1px solid #ccd6e0;
+  border-radius: 8px;
+  font-size: 16px;
+}
+.btn{
+  padding: 14px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#searchBtn{
+  background-color: #2b6cb0;
+  color: white;
+}
+#resetBtn{
+  background-color: #718096;
+  color: white;
+}
+.total-info{
+  background: #eef5ff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: #223354;
+}
+table{
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td{
+  border: 1px solid #e2e8f0;
+  padding: 16px 12px;
+  text-align: center;
+  vertical-align: middle;
+}
+th{
+  background-color: #eef2f9;
+  color: #223354;
+  font-weight: 600;
+}
+td{
+  color: #333;
+}
+tr:nth-child(even){
+  background-color: #f9fbfd;
+}
+tr:hover{
+  background-color: #eef5ff;
+}
+/* 長品名自動換行 */
+td:nth-child(2){
+  text-align: left;
+  word-break: break-word;
+  white-space: normal;
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-    <h2>貨號｜品名｜架位｜庫存查詢系統</h2>
-    <div class="tip">可輸入貨號/品名關鍵字，列出所有對應架位與數量，自動合計總庫存</div>
-    <div class="search-area">
-        <input id="keyword" placeholder="輸入貨號或名稱搜尋">
-        <button id="searchBtn">查詢</button>
-        <button id="resetBtn">清空</button>
+<div class="container">
+    <h1>多位置庫存查詢</h1>
+    <div class="desc">輸入貨號關鍵字，可一次列出所有匹配庫存位置與數量</div>
+
+    <div class="search-bar">
+        <input id="keyword" placeholder="輸入貨號查詢">
+        <button id="searchBtn" class="btn">查詢</button>
+        <button id="resetBtn" class="btn">清空結果</button>
     </div>
-    <div id="totalBox" class="total-box" style="display:none;"></div>
+
+    <div id="totalBox" class="total-info" style="display:none;"></div>
+
     <table>
         <thead>
             <tr>
@@ -54,21 +139,20 @@ fetch("./stock.csv")
     parseCSV(text);
 })
 .catch(() => {
-    document.getElementById("resultTable").innerHTML = `<tr><td colspan="4">無法讀取 stock.csv</td></tr>`;
+    document.getElementById("resultTable").innerHTML = `<tr><td colspan="4">無法讀取 stock.csv，請確認檔案存在</td></tr>`;
 })
 
 function parseCSV(txt){
     const rows = txt.trim().split("\n");
     stockList = [];
-    // 跳過第1行表頭，從第2行開始讀取
     for(let i=1; i<rows.length; i++){
         let arr = rows[i].split(",");
         if(arr.length >= 4){
             stockList.push({
-                pid: arr[0].trim(),    // A欄 貨號
-                name: arr[1].trim(),   // B欄 名稱
-                shelf: arr[2].trim(),  // C欄 架位
-                qty: arr[3].trim()     // D欄 庫存
+                pid: arr[0].trim(),
+                name: arr[1].trim(),
+                shelf: arr[2].trim(),
+                qty: arr[3].trim()
             })
         }
     }
@@ -86,7 +170,6 @@ document.getElementById("searchBtn").onclick = function(){
         return;
     }
 
-    // 支援 貨號 或 名稱 模糊搜尋
     let list = stockList.filter(item=>{
         return item.pid.toLowerCase().includes(key) || item.name.toLowerCase().includes(key);
     })
@@ -96,12 +179,10 @@ document.getElementById("searchBtn").onclick = function(){
         return;
     }
 
-    // 計算該查詢結果總庫存
     let sum = list.reduce((acc, cur)=>{
         return acc + (Number(cur.qty) || 0);
     }, 0);
-
-    totalBox.innerHTML = `查詢結果共 ${list.length} 筆｜該項合計總庫存：<strong>${sum}</strong>`;
+    totalBox.innerHTML = `查詢結果共 ${list.length} 筆｜合計總庫存：${sum}`;
     totalBox.style.display = "block";
 
     list.forEach(row=>{
@@ -116,12 +197,12 @@ document.getElementById("searchBtn").onclick = function(){
     })
 }
 
-// 回車快捷查詢
-document.getElementById("keyword").addEventListener("keydown",e=>{
+// Enter快捷查詢
+document.getElementById("keyword").addEventListener("keydown", e=>{
     if(e.key === "Enter") document.getElementById("searchBtn").click();
 })
 
-// 重置清空
+// 重置
 document.getElementById("resetBtn").onclick = ()=>{
     document.getElementById("keyword").value = "";
     document.getElementById("resultTable").innerHTML = "";
