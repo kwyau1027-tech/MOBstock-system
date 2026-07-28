@@ -2,18 +2,23 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>庫存查詢系統</title>
+<!-- 行動端優先的 Viewport 設定 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>庫存查詢系統 (行動優化版)</title>
 <style>
+/* 基礎樣式 (適用所有裝置) */
 *{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Microsoft JhengHei", sans-serif;
+  /* 避免手機上點擊時出現半透明背景 */
+  -webkit-tap-highlight-color: transparent; 
 }
 body{
-  background-color: #f0f4f9;
+  background-color: #f4f7f9;
   padding: 16px;
+  color: #333;
 }
 .container{
   background: #ffffff;
@@ -21,110 +26,225 @@ body{
   padding: 24px;
   max-width: 900px;
   margin: 0 auto;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 h1{
   text-align: center;
-  font-size: 22px;
-  color: #223354;
-  margin-bottom: 16px;
+  font-size: 24px;
+  color: #1a202c;
+  margin-bottom: 8px;
 }
 .desc{
   text-align: center;
-  color: #666;
+  color: #718096;
   font-size: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
+
+/* 搜尋列 */
 .search-bar{
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 20px;
-  flex-wrap: wrap;
 }
 #keyword{
   flex: 1;
-  min-width: 180px;
   padding: 14px 16px;
-  border: 1px solid #ccd6e0;
-  border-radius: 8px;
-  font-size: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 16px; /* 至少 16px，避免 iOS 自動放大 */
+  transition: border-color 0.2s;
+}
+#keyword:focus{
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 .btn{
-  padding: 14px 20px;
-  border-radius: 8px;
+  padding: 14px 24px;
+  border-radius: 10px;
   border: none;
   font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.btn:active{
+  opacity: 0.8;
 }
 #searchBtn{
-  background-color: #2b6cb0;
+  background-color: #3182ce;
   color: white;
 }
 #resetBtn{
-  background-color: #718096;
-  color: white;
+  background-color: #edf2f7;
+  color: #4a5568;
 }
+
+/* 資訊總覽列 */
 .total-info{
-  background: #eef5ff;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  color: #223354;
+  background: #e6fffa;
+  border: 1px solid #b2f5ea;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  color: #2c7a7b;
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
 }
+
+/* === 電腦端表格樣式 (寬度 > 768px) === */
 table{
   width: 100%;
   border-collapse: collapse;
 }
 th, td{
-  border: 1px solid #e2e8f0;
-  padding: 16px 12px;
-  text-align: center;
-  vertical-align: middle;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 16px;
+  text-align: left;
 }
 th{
-  background-color: #eef2f9;
-  color: #223354;
+  background-color: #f8fafc;
+  color: #4a5568;
   font-weight: 600;
+  font-size: 15px;
 }
 td{
-  color: #333;
+  color: #2d3748;
 }
-tr:nth-child(even){
-  background-color: #f9fbfd;
+tr:last-child td {
+  border-bottom: none;
 }
-tr:hover{
-  background-color: #eef5ff;
+tr:hover td{
+  background-color: #fbfdff;
 }
-/* 品名欄：靠左對齊 + 自動換行，解決豎排問題 */
+/* 品名欄：自動換行 */
 td.col-name{
-  text-align: left;
   word-break: break-word;
   white-space: normal;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+td.col-qty{
+  font-weight: bold;
+  color: #2b6cb0;
+}
+
+/* === 手機/平板端 RWD 最佳化 (卡片式佈局) === */
+@media (max-width: 768px) {
+  body {
+    padding: 12px 10px;
+  }
+  .container {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+  h1 {
+    font-size: 20px;
+  }
+  
+  /* 搜尋列改成直排，加大按鈕 */
+  .search-bar {
+    flex-direction: column;
+    gap: 10px;
+  }
+  #keyword, .btn {
+    width: 100%;
+    padding: 16px; /* 更適合手指點擊的大小 */
+  }
+
+  /* 隱藏傳統表頭 */
+  table thead {
+    display: none;
+  }
+  
+  /* 將表格列改成單獨卡片 */
+  table, table tbody, table tr {
+    display: block;
+    width: 100%;
+  }
+
+  table tr {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  }
+
+  /* 表格儲存格欄位化 */
+  table td {
+    display: flex;
+    justify-content: space-between; /* 標題左，內容右 */
+    align-items: flex-start;
+    border: none;
+    border-bottom: 1px dashed #edf2f7;
+    padding: 12px 0;
+    text-align: right;
+  }
+
+  table td:last-child {
+    border-bottom: none;
+    padding-bottom: 4px;
+  }
+
+  /* 利用 ::before 為每欄加上中文標題說明 */
+  table td::before {
+    font-weight: bold;
+    color: #718096;
+    margin-right: 16px;
+    text-align: left;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* 設定每欄的中文標題內容 */
+  table td:nth-of-type(1)::before { content: "貨號"; }
+  table td:nth-of-type(2)::before { content: "名稱"; }
+  table td:nth-of-type(3)::before { content: "存放架位"; }
+  table td:nth-of-type(4)::before { content: "庫存數量"; }
+
+  /* 針對品名內容靠右對齊 */
+  table td.col-name {
+    text-align: right;
+    justify-content: flex-end;
+  }
+  /* 為品名加一點寬度限制，避免擠壓到標題 */
+  table td.col-name-val {
+    width: 65%;
+  }
+  /* 手機上強調庫存 */
+  table td.col-qty {
+    font-size: 18px;
+    color: #2b6cb0;
+  }
 }
 </style>
 </head>
 <body>
 <div class="container">
     <h1>多位置庫存查詢</h1>
-    <div class="desc">輸入貨號關鍵字，可一次列出所有匹配庫存位置與數量</div>
+    <div class="desc">輸入貨號關鍵字，一次列出所有存放位置</div>
 
     <div class="search-bar">
-        <input id="keyword" placeholder="輸入貨號查詢">
+        <!-- 行動端輸入框樣式優化 -->
+        <input id="keyword" type="search" placeholder="輸入貨號或品名查詢" enterkeyhint="search">
         <button id="searchBtn" class="btn">查詢</button>
-        <button id="resetBtn" class="btn">清空結果</button>
+        <button id="resetBtn" class="btn">清空</button>
     </div>
 
     <div id="totalBox" class="total-info" style="display:none;"></div>
 
+    <!-- 手機上會自動被 CSS 轉化為卡片 -->
     <table>
         <thead>
             <tr>
                 <th>貨號</th>
-                <th>名稱</th>
+                <th width="40%">名稱</th>
                 <th>存放架位</th>
-                <th>庫存數量</th>
+                <th>庫存</th>
             </tr>
         </thead>
         <tbody id="resultTable"></tbody>
@@ -134,7 +254,7 @@ td.col-name{
 <script>
 let stockList = [];
 
-// 專業CSV解析器，正確處理引號、換行、逗號欄位
+// 專業CSV解析器
 function parseCSV(csvText) {
   const result = [];
   let row = [];
@@ -177,13 +297,13 @@ function parseCSV(csvText) {
   return result;
 }
 
-// 載入UTF-8編碼的CSV檔
+// 載入CSV檔
 fetch("./stock.csv")
 .then(res => res.text())
 .then(text => {
     const rows = parseCSV(text);
     stockList = [];
-    // 跳過表頭行，逐行讀取4欄資料
+    // 跳過表頭，逐行讀取
     for(let i=1; i<rows.length; i++){
         const arr = rows[i];
         if(arr.length >= 4){
@@ -197,11 +317,24 @@ fetch("./stock.csv")
     }
 })
 .catch(() => {
-    document.getElementById("resultTable").innerHTML = `<tr><td colspan="4">無法讀取 stock.csv，請確認檔案存在</td></tr>`;
+    document.getElementById("resultTable").innerHTML = `<tr><td colspan="4" style="text-align:center;color:#e53e3e;">無法讀取 stock.csv<br>請確認檔案存在且使用 Server 模式開啟</td></tr>`;
 })
 
 // 查詢功能
 document.getElementById("searchBtn").onclick = function(){
+    doSearch();
+}
+
+// Enter快捷查詢 / 行動端鍵盤"搜尋"
+document.getElementById("keyword").addEventListener("keydown", e=>{
+    if(e.key === "Enter") {
+        doSearch();
+        // 隱藏手機鍵盤
+        document.getElementById("keyword").blur(); 
+    }
+})
+
+function doSearch() {
     let key = document.getElementById("keyword").value.trim().toLowerCase();
     let tbody = document.getElementById("resultTable");
     let totalBox = document.getElementById("totalBox");
@@ -209,17 +342,17 @@ document.getElementById("searchBtn").onclick = function(){
     totalBox.style.display = "none";
 
     if(!key){
-        tbody.innerHTML = `<tr><td colspan="4">請輸入查詢關鍵字</td></tr>`;
+        tbody.innerHTML = `<tr class="no-data"><td colspan="4" style="text-align:center; color:#a0aec0;">請輸入查詢關鍵字</td></tr>`;
         return;
     }
 
-    // 支援貨號、品名雙模糊查詢
+    // 模糊查詢
     let list = stockList.filter(item=>{
         return item.pid.toLowerCase().includes(key) || item.name.toLowerCase().includes(key);
     })
 
     if(list.length === 0){
-        tbody.innerHTML = `<tr><td colspan="4">無匹配資料</td></tr>`;
+        tbody.innerHTML = `<tr class="no-data"><td colspan="4" style="text-align:center; color:#a0aec0;">無匹配資料</td></tr>`;
         return;
     }
 
@@ -227,28 +360,23 @@ document.getElementById("searchBtn").onclick = function(){
     let sum = list.reduce((acc, cur)=>{
         return acc + (Number(cur.qty) || 0);
     }, 0);
-    totalBox.innerHTML = `查詢結果共 ${list.length} 筆｜合計總庫存：${sum}`;
+    totalBox.innerHTML = `共 ${list.length} 筆｜總庫存 ${sum}`;
     totalBox.style.display = "block";
 
-    // 渲染結果，品名欄加入專屬樣式
-    list.forEach(row=>{
-        tbody.innerHTML += `
+    // 渲染卡片/表格列
+    const htmlRows = list.map(row => `
         <tr>
             <td>${row.pid}</td>
-            <td class="col-name">${row.name}</td>
+            <td class="col-name"><div class="col-name-val">${row.name}</div></td>
             <td>${row.shelf}</td>
-            <td>${row.qty}</td>
+            <td class="col-qty">${row.qty}</td>
         </tr>
-        `
-    })
+    `).join('');
+
+    tbody.innerHTML = htmlRows;
 }
 
-// Enter快捷查詢
-document.getElementById("keyword").addEventListener("keydown", e=>{
-    if(e.key === "Enter") document.getElementById("searchBtn").click();
-})
-
-// 重置清空
+// 重置
 document.getElementById("resetBtn").onclick = ()=>{
     document.getElementById("keyword").value = "";
     document.getElementById("resultTable").innerHTML = "";
